@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Последние обновления на сайте{% endblock %}
+{% block header %}
+<a href="{% url 'group_list' %}">Список сообществ</a><br>
+<a href="{% url 'user_list' %}">Список пользователей</a><br><br>
+Последние обновления на сайте
+{% endblock %}
+{% block content %}
+  
+  {% for post in page %}
+    {% include 'includes/post_card.html' %}
+  {% endfor %}
+  {% include "includes/paginator.html" %}
+  
+{% endblock %} 
