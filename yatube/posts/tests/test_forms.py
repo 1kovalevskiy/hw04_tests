@@ -56,3 +56,35 @@ class PostFormTests(TestCase):
                 author=PostFormTests.user,
             ).exists()
         )
+
+    def test_edit_post(self):
+        Post.objects.create(
+            text='Тест редактирования',
+            author=PostFormTests.user,
+            group=PostFormTests.group,
+        )
+        posts_count = Post.objects.count()
+        pk = Post.objects.filter(text='Тест редактирования').get().pk
+        form_data = {
+            'text': 'Успешно отредактировано',
+            'author': PostFormTests.user,
+        }
+        response = self.authorized_client.post(
+            reverse('post_edit', kwargs={
+                'username': PostFormTests.user.username,
+                'post_id': pk
+            }),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(response, reverse('post', kwargs={
+                             'username': PostFormTests.user.username,
+                             'post_id': pk
+                             }))
+        self.assertEqual(Post.objects.count(), posts_count)
+        self.assertTrue(
+            Post.objects.filter(
+                text='Успешно отредактировано',
+                author=PostFormTests.user,
+            ).exists()
+        )
