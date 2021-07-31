@@ -18,13 +18,13 @@ class PostsModelTest(TestCase):
         )
 
         cls.group = Group.objects.create(
-            title='f'*300,
+            title='f' * 300,
             slug='testgroup',
             description='testgroup',
         )
 
         cls.post = Post.objects.create(
-            text='f'*300,
+            text='f' * 300,
             author=cls.user,
             group=cls.group,
         )
