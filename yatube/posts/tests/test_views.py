@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
+from time import sleep
 
 from posts.models import Group, Post
 
@@ -28,17 +29,21 @@ class PostPageTests(TestCase):
             slug='test-group3'
         )
         cls.user = User.objects.create_user(username='TestUser')
+        # Не уверен, что через bulk_create у них будет разная дата создания
         for i in range(13):
             Post.objects.create(
                 text=f'text{i}',
                 author=PostPageTests.user,
                 group=PostPageTests.group1,
             )
+            # пришлось ввести задержку, чтобы посты создавались в разное время
+            # а то последним иногда был и 11, и 10 пост, вместо 12!
+            sleep(0.005)
         cls.templates_page_names = {
-            'index.html': reverse('index'),
-            'new_post.html': reverse('new_post'),
-            'group.html': reverse('group_posts',
-                                  args=[PostPageTests.group1.slug]),
+            'posts/index.html': reverse('index'),
+            'posts/new_post.html': reverse('new_post'),
+            'posts/group.html': reverse('group_posts',
+                                        args=[PostPageTests.group1.slug]),
         }
         cls.form_fields = {
             'text': forms.fields.CharField,
@@ -68,18 +73,13 @@ class PostPageTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_first_page_contains_ten_records(self):
-        """Пагинатор передал 10 постов на первую страницу"""
+        """Пагинатор передал 10 постов на первую страницу и 3 на вторую"""
         for url in PostPageTests.page_with_post_list:
             with self.subTest(url=url):
                 response = self.guest_client.get(url)
                 self.assertEqual(len(response.context['page']), 10)
-
-    def test_second_page_contains_three_records(self):
-        """Пагинатор передал 3 поста на вторую страницу страницу"""
-        for url in PostPageTests.page_with_post_list:
-            with self.subTest(url=url):
-                response = self.guest_client.get(url + '?page=2')
-                self.assertEqual(len(response.context['page']), 3)
+                response2 = self.guest_client.get(url + '?page=2')
+                self.assertEqual(len(response2.context['page']), 3)
 
     def test_page_with_list_show_correct_context(self):
         """
@@ -143,7 +143,18 @@ class PostPageTests(TestCase):
 
     def test_group2_is_empty(self):
         """Запись не отображается в группе 2"""
+        self.group4 = Group.objects.create(
+            title='title4',
+            description='description4',
+            slug='test-group4'
+        )
+        Post.objects.create(
+            text='new-post',
+            author=PostPageTests.user,
+            group=PostPageTests.group1,
+        )
         response = self.authorized_client.get(
-            reverse('group_posts', args=[PostPageTests.group2.slug]))
+            reverse('group_posts', args=[self.group4.slug]))
         objects = response.context['page']
+        # Не получается с count
         self.assertEqual(len(objects), 0)

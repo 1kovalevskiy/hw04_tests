@@ -28,13 +28,12 @@ class PostsModelTest(TestCase):
             author=cls.user,
             group=cls.group,
         )
+        cls.objects = {
+            PostsModelTest.group: PostsModelTest.group.title,
+            PostsModelTest.post: PostsModelTest.post.text[:15]
+        }
 
-    def test_str_group(self):
-        group = PostsModelTest.group
-        expected_object_name = group.title
-        self.assertEqual(expected_object_name, str(group))
-
-    def test_str_post(self):
-        post = PostsModelTest.post
-        expected_object_name = post.text[:15]
-        self.assertEqual(expected_object_name, str(post))
+    def test_str(self):
+        for model_object, expected_name in PostsModelTest.objects.items():
+            with self.subTest(model_object=model_object):
+                self.assertEqual(expected_name, str(model_object))

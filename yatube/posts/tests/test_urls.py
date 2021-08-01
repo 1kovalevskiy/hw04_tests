@@ -35,29 +35,29 @@ class PostsURLTests(TestCase):
             group=PostsURLTests.group,
         )
         cls.templates_url_names = {
-            'index.html': '/',
-            'group.html': '/group/test-slug/',
-            'new_post.html': '/new/',
-            'post_edit.html': '/test-user1/1/edit/',
+            'posts/index.html': '/',
+            'posts/group.html': f'/group/{cls.group2.slug}/',
+            'posts/new_post.html': '/new/',
+            'posts/post_edit.html': f'/{cls.user1.username}/1/edit/',
         }
         # 1 - guest, 2 - user1, 2 - user2
         cls.page_access = {
             '/': (200, 200),
             '/new/': (302, 200),
-            '/group/test-slug/': (200, 200),
-            '/test-user1/': (200, 200),
-            '/test-user2/': (200, 200),
-            '/test-user1/1/': (200, 200),
-            '/test-user2/1/': (404, 404),
-            '/test-user1/1/edit/': (302, 200),
-            '/test-user2/2/edit/': (302, 302),
+            f'/group/{cls.group2.slug}/': (200, 200),
+            f'/{cls.user1.username}/': (200, 200),
+            f'/{cls.user2.username}/': (200, 200),
+            f'/{cls.user1.username}/1/': (200, 200),
+            f'/{cls.user2.username}/1/': (404, 404),
+            f'/{cls.user1.username}/1/edit/': (302, 200),
+            f'/{cls.user2.username}/2/edit/': (302, 302),
         }
         cls.page_redirect_guest = {
             '/new/': '/auth/login/?next=/new/',
-            '/test-user1/1/edit/': '/auth/login/?next=/test-user1/1/edit/',
+            f'/{cls.user1.username}/1/edit/': '/auth/login/?next=/test-user1/1/edit/',
         }
         cls.page_redirect_authorized = {
-            '/test-user2/2/edit/': '/'
+            f'/{cls.user2.username}/2/edit/': '/'
         }
 
     def setUp(self):

@@ -27,6 +27,7 @@ class PostFormTests(TestCase):
         cls.form = PostForm()
 
     def setUp(self):
+        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(PostFormTests.user)
 
@@ -88,3 +89,23 @@ class PostFormTests(TestCase):
                 author=PostFormTests.user,
             ).exists()
         )
+
+    def test_create_new_post(self):
+        """Гость не может создать запись в Post."""
+        # Подсчитаем количество записей в Task
+        posts_count = Post.objects.count()
+
+        form_data = {
+            'text': 'Тестовый текст от гостя',
+            'author': PostFormTests.user,
+        }
+        # Отправляем POST-запрос
+        response = self.guest_client.post(
+            reverse('new_post'),
+            data=form_data,
+            follow=True
+        )
+        # Проверяем, сработал ли редирект
+        self.assertRedirects(response, '/auth/login/?next=/new/')
+        # Проверяем, увеличилось ли число постов
+        self.assertEqual(Post.objects.count(), posts_count)

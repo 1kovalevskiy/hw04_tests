@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "posts/base.html" %}
 {% block title %}Последние обновления на сайте{% endblock %}
 {% block header %}
 <a href="{% url 'group_list' %}">Список сообществ</a><br>
@@ -8,8 +8,8 @@
 {% block content %}
   
   {% for post in page %}
-    {% include 'includes/post_card.html' %}
+    {% include 'posts/includes/post_card.html' %}
   {% endfor %}
-  {% include "includes/paginator.html" %}
+  {% include "posts/includes/paginator.html" %}
   
 {% endblock %} 

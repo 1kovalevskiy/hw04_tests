@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "posts/base.html" %}
 {% block title %}Новый пост{% endblock %}
 {% block header %}{% endblock %}
 
@@ -29,7 +29,6 @@
                   {% endif %}
                 </label>
                 <div class="col-md-6">
-                  {# подключаем фильтр и указываем класс #}
                   {{ field }}
                   {% if field.help_text %}
                     <small

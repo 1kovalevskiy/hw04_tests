@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "posts/base.html" %}
 {% block title %}Записи сообщества {{ group.title }}{% endblock %}
 {% block header %}{{ group.title }}{% endblock %}
 {% block description %}{{ group.description }}{% endblock %}
@@ -11,6 +11,6 @@
 <p>{{ post.text|linebreaksbr }}</p>
 {% if not forloop.last %}<hr>{% endif %}
 {% endfor %}
-{% include "includes/paginator.html" %}
+{% include "posts/includes/paginator.html" %}
   <br><br><h3><a href=".">Список сообществ</a></h3>
 {% endblock %} 
