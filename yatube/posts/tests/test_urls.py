@@ -42,6 +42,8 @@ class PostsURLTests(TestCase):
         }
         # 1 - guest, 2 - user1, 2 - user2
         cls.page_access = {
+            # а писать enum не затратнее?
+            # тут просто статус ведь и все
             '/': (200, 200),
             '/new/': (302, 200),
             f'/group/{cls.group2.slug}/': (200, 200),
