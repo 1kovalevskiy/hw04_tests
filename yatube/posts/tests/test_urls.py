@@ -54,7 +54,8 @@ class PostsURLTests(TestCase):
         }
         cls.page_redirect_guest = {
             '/new/': '/auth/login/?next=/new/',
-            f'/{cls.user1.username}/1/edit/': '/auth/login/?next=/test-user1/1/edit/',
+            f'/{cls.user1.username}/1/edit/': ''
+            + '/auth/login/?next=/test-user1/1/edit/',
         }
         cls.page_redirect_authorized = {
             f'/{cls.user2.username}/2/edit/': '/'
