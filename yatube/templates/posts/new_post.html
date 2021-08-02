@@ -3,6 +3,7 @@
 {% block header %}{% endblock %}
 
 {% block content %}
+  {% load user_filters %}
 
   <div class="row justify-content-center">
     <div class="col-md-8 p-5">
@@ -29,7 +30,12 @@
                   {% endif %}
                 </label>
                 <div class="col-md-6">
-                  {{ field }}
+                {% comment %}
+                Я понял, что ты имел ввиду
+                Но я совсем не понял, что это и для чего оно нужно
+                А самоге грустное, что я не понял, как оно
+                {% endcomment %}
+                  {{ field|addclass:"form-control" }}
                   {% if field.help_text %}
                     <small
                       id="{{ field.id_for_label }}-help"

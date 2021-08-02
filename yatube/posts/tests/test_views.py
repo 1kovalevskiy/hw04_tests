@@ -156,5 +156,6 @@ class PostPageTests(TestCase):
         response = self.authorized_client.get(
             reverse('group_posts', args=[self.group4.slug]))
         objects = response.context['page']
-        # Не получается с count
-        self.assertEqual(len(objects), 0)
+        # Не знал, что надо objects.paginator.count
+        # Пытался objects.count - не работало
+        self.assertEqual(objects.paginator.count, 0)
