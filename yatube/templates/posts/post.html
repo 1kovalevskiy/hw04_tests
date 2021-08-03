@@ -1,4 +1,4 @@
-{% extends "posts/base.html" %}
+{% extends "base.html" %}
 {% block title %}Профиль {{ user_post.username }}{% endblock %}
 {% block header %}
      
@@ -8,5 +8,6 @@
 {% block right-content %}
 
     {% include 'posts/includes/post_card.html' %}
+    {% include 'posts/includes/comments.html' %}
 
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "posts/base.html" %}
+{% extends "base.html" %}
 {% block title %}Новый пост{% endblock %}
 {% block header %}{% endblock %}
 
@@ -17,7 +17,7 @@
             </div>
           {% endfor %}
 
-          <form method="post">
+          <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% for field in form %}
               <div class="form-group row" aria-required={{ field.field.required }}>

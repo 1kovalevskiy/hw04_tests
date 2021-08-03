@@ -1,3 +1,9 @@
+import shutil
+import tempfile
+
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -13,6 +19,8 @@ class PostPageTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
         cls.group1 = Group.objects.create(
             title='title',
             description='description',
@@ -29,12 +37,26 @@ class PostPageTests(TestCase):
             slug='test-group3'
         )
         cls.user = User.objects.create_user(username='TestUser')
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
         # Не уверен, что через bulk_create у них будет разная дата создания
         for i in range(13):
             Post.objects.create(
                 text=f'text{i}',
                 author=PostPageTests.user,
                 group=PostPageTests.group1,
+                image=cls.uploaded
             )
             # пришлось ввести задержку, чтобы посты создавались в разное время
             # а то последним иногда был и 11, и 10 пост, вместо 12!
@@ -54,6 +76,15 @@ class PostPageTests(TestCase):
             reverse('group_posts', args=[PostPageTests.group1.slug]),
             reverse('profile', args=[PostPageTests.user.username]),
         ]
+    
+    @classmethod
+    def tearDownClass(cls):
+        # Модуль shutil - библиотека Python с прекрасными инструментами
+        # для управления файлами и директориями:
+        # создание, удаление, копирование, перемещение, изменение папок|файлов
+        # Метод shutil.rmtree удаляет директорию и всё её содержимое
+        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
 
     def setUp(self):
         # Создаём неавторизованный клиент
@@ -91,13 +122,19 @@ class PostPageTests(TestCase):
                 response = self.authorized_client.get(url)
                 # Взяли первый элемент из списка и проверили, что его
                 # содержание совпадает с ожидаемым
-                first_object = response.context['page'][0]
-                task_text_0 = first_object.text
-                task_author_0 = first_object.author
-                task_group_0 = first_object.group
-                self.assertEqual(task_text_0, 'text12')
-                self.assertEqual(task_author_0, PostPageTests.user)
-                self.assertEqual(task_group_0, PostPageTests.group1)
+                pk = Post.objects.filter(text='text12').get().pk
+
+                post = response.context['page'][0]
+                post_text_0 = post.text
+                post_author_0 = post.author
+                post_group_0 = post.group
+                post_image_0 = post.image
+                self.assertEqual(post_text_0, 'text12')
+                self.assertEqual(post_author_0, PostPageTests.user)
+                self.assertEqual(post_group_0, PostPageTests.group1)
+                self.assertEqual(post_image_0, 
+                    Post.objects.get(id=pk).image
+                )
 
     def test_page_with_form_show_correct_context(self):
         """Шаблоны с формами сформированы с правильным контекстом."""
@@ -116,17 +153,21 @@ class PostPageTests(TestCase):
         """
         Шаблон поста сформированы с правильным контекстом.
         """
-        pk = Post.objects.filter(text='text11').get().pk
+        pk = Post.objects.filter(text='text12').get().pk
         response = self.authorized_client.get(f'/TestUser/{pk}/')
         # Взяли первый элемент из списка и проверили, что его
         # содержание совпадает с ожидаемым
         post = response.context['post']
-        task_text_0 = post.text
-        task_author_0 = post.author
-        task_group_0 = post.group
-        self.assertEqual(task_text_0, 'text11')
-        self.assertEqual(task_author_0, PostPageTests.user)
-        self.assertEqual(task_group_0, PostPageTests.group1)
+        post_text_0 = post.text
+        post_author_0 = post.author
+        post_group_0 = post.group
+        post_image_0 = post.image
+        self.assertEqual(post_text_0, 'text12')
+        self.assertEqual(post_author_0, PostPageTests.user)
+        self.assertEqual(post_group_0, PostPageTests.group1)
+        self.assertEqual(post_image_0, 
+            Post.objects.get(id=pk).image
+        )
 
     def test_create_new_post_and_show_in_group1(self):
         """Запись создалась и отображается в группе 1"""

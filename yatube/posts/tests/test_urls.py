@@ -53,6 +53,7 @@ class PostsURLTests(TestCase):
             f'/{cls.user2.username}/1/': (404, 404),
             f'/{cls.user1.username}/1/edit/': (302, 200),
             f'/{cls.user2.username}/2/edit/': (302, 302),
+            'какой-то_бред': (404, 404)
         }
         cls.page_redirect_guest = {
             '/new/': '/auth/login/?next=/new/',
